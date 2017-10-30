@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    tools:context=".ui.activity.MainActivity">
+
+    <ImageView
+        android:id="@+id/imgur_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="imgur image"
+        android:transitionName="transition_event_image"
+        android:adjustViewBounds="true"
+        tools:src="@android:drawable/sym_contact_card" />
+
+    <TextView
+        android:id="@+id/imgur_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/darker_gray"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:padding="@dimen/right_padding_menu"
+        android:textColor="@color/colorPrimary"
+        tools:text="test description" />
+
+</LinearLayout>

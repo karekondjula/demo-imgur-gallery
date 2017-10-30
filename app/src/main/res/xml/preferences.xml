@@ -1,0 +1,21 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="viral"
+        android:entries="@array/pref_sort_titles"
+        android:entryValues="@array/pref_sort_values"
+        android:key="preference_sort"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_sort" />
+
+    <ListPreference
+        android:defaultValue="day"
+        android:entries="@array/pref_window_titles"
+        android:entryValues="@array/pref_window_values"
+        android:key="preference_window"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_window" />
+
+</PreferenceScreen>

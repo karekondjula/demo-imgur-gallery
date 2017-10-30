@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.activity.MainActivity">
+
+    <item
+        android:id="@+id/action_switch_rv_view"
+        android:icon="@drawable/ic_filter_list"
+        android:title=""
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_viral"
+        android:icon="@android:drawable/checkbox_off_background"
+        android:title=""
+        app:actionLayout="@layout/checkbox_layout"
+        app:showAsAction="ifRoom|withText" />
+
+</menu>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckBox xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:paddingRight="@dimen/fab_margin"
+    android:orientation="horizontal"
+    android:text="@string/viral"
+    android:textColor="@android:color/black"
+    android:id="@+id/viral_check_box"
+    android:buttonTint="@android:color/black">
+
+</CheckBox>
