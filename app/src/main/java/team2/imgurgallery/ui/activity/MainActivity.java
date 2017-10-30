@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                             section = ImgurAPI.SECTION_USER;
                         }
                         fetchGallery(section, isViralChecked);
+                        recyclerView.smoothScrollToPosition(0);
 
                     }
                 }.start();
@@ -167,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 isViralChecked = isChecked;
 
                 fetchGallery(section, isViralChecked);
+                recyclerView.smoothScrollToPosition(0);
             }
         });
 
@@ -195,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
                             recyclerView.setLayoutManager(sglm);
                             break;
                     }
-
+                    recyclerView.smoothScrollToPosition(0);
                     return true;
                 }
             });

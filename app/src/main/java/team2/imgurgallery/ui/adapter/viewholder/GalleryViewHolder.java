@@ -42,7 +42,6 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View view) {
                 if (galleryAlbum != null) {
-                    // TODO some albums have no images ?!?!?!??!?!? dafuq with those (DOT title Primer)
                     Intent intent = ImageActivity.createIntent(mContext, galleryAlbum);
 
                     ActivityOptions options = ActivityOptions
@@ -57,12 +56,15 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
     public void setItem(GalleryAlbum galleryAlbum) {
         this.galleryAlbum = galleryAlbum;
 
-        String imageUrl = null;
-        String imageDescription = null;
+        String imageUrl;
+        String imageDescription;
         if (galleryAlbum.isAlbum) {
             if (galleryAlbum.images.size() > 0 && galleryAlbum.images.get(0) != null) {
                 imageUrl = galleryAlbum.images.get(0).link;
                 imageDescription = galleryAlbum.images.get(0).description;
+            } else {
+                imageUrl = galleryAlbum.link;
+                imageDescription = galleryAlbum.description;
             }
         } else {
             imageUrl = galleryAlbum.link;
@@ -70,11 +72,27 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
         }
 
         if (!TextUtils.isEmpty(imageUrl)) {
-            Glide.with(mContext)
-                    .load(imageUrl)
-                    .fitCenter()
-                    .override(200, 600)
-                    .into(imgurImage);
+
+            if (imageUrl.endsWith(".gif")) {
+                Glide.with(mContext)
+                        .load(imageUrl)
+                        .asGif()
+                        .fitCenter()
+//                    .override(200, 600)
+                        .thumbnail(0.3f)
+//                    .placeholder(R.drawable. ic_sync_black_24dp)
+                        .error(R.drawable.ic_sync_problem_black_24dp)
+                        .into(imgurImage);
+            } else {
+                Glide.with(mContext)
+                        .load(imageUrl)
+                        .fitCenter()
+//                    .override(200, 600)
+                        .thumbnail(0.5f)
+//                    .placeholder(R.drawable. ic_sync_black_24dp)
+                        .error(R.drawable.ic_sync_problem_black_24dp)
+                        .into(imgurImage);
+            }
         }
 
         if (!TextUtils.isEmpty(imageDescription)) {
