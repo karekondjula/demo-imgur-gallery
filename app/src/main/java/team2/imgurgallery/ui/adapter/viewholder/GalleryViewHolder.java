@@ -1,22 +1,30 @@
 package team2.imgurgallery.ui.adapter.viewholder;
 
-import android.app.ActivityOptions;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.GenericTransitionOptions;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import team2.imgurgallery.R;
+import team2.imgurgallery.model.CustomImageSizeModel;
+import team2.imgurgallery.model.CustomImageSizeModelFutureStudio;
 import team2.imgurgallery.model.GalleryAlbum;
-import team2.imgurgallery.ui.activity.ImageActivity;
-import team2.imgurgallery.ui.activity.MainActivity;
+import team2.imgurgallery.ui.callback.OnClickCallback;
+import team2.imgurgallery.utils.GlideApp;
 
 /**
  * Created by d-kareski on 10/23/17.
@@ -30,10 +38,10 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.imgur_description)
     TextView description;
 
-    private Context mContext;
+    private Context appContext;
     private GalleryAlbum galleryAlbum;
 
-    public GalleryViewHolder(View itemView, Context mContext) {
+    public GalleryViewHolder(View itemView, Context appContext, final OnClickCallback onClickCallback) {
         super(itemView);
 
         ButterKnife.bind(this, itemView);
@@ -41,16 +49,10 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (galleryAlbum != null) {
-                    Intent intent = ImageActivity.createIntent(mContext, galleryAlbum);
-
-                    ActivityOptions options = ActivityOptions
-                            .makeSceneTransitionAnimation((MainActivity) mContext, imgurImage, "transition_event_image");
-                    mContext.startActivity(intent, options.toBundle());
-                }
+                onClickCallback.onImageSelected(galleryAlbum, imgurImage);
             }
         });
-        this.mContext = mContext;
+        this.appContext = appContext;
     }
 
     public void setItem(GalleryAlbum galleryAlbum) {
@@ -73,26 +75,66 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
 
         if (!TextUtils.isEmpty(imageUrl)) {
 
-            if (imageUrl.endsWith(".gif")) {
-                Glide.with(mContext)
-                        .load(imageUrl)
-                        .asGif()
-                        .fitCenter()
-//                    .override(200, 600)
-                        .thumbnail(0.3f)
+//            if (imageUrl.endsWith(".gif")) {
+//                Glide.with(appContext)
+//                        .load(imageUrl)
+//                        .asGif()
+//                        .fitCenter()
+////                    .override(200, 600)
+//                        .thumbnail(0.3f)
 //                    .placeholder(R.drawable. ic_sync_black_24dp)
-                        .error(R.drawable.ic_sync_problem_black_24dp)
-                        .into(imgurImage);
-            } else {
-                Glide.with(mContext)
-                        .load(imageUrl)
-                        .fitCenter()
+//                        .error(R.drawable.ic_sync_problem_black_24dp)
+//                        .crossFade()
+//                        .fallback(R.drawable. ic_sync_black_24dp)
+//                        .into(imgurImage);
+//            } else {
+
+
+//            private SimpleTarget target2 = new SimpleTarget<Bitmap>( 300, 800 ) {
+//                @Override
+//                public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
+//                    imageView2.setImageBitmap( bitmap );
+//                }
+//            };
+
+
+//            DrawableRequestBuilder<String> thumbnailRequest = Glide
+//                    .with(appContext)
+//                    .load(imageUrl);
+
+
+            RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                            Target<Drawable> target, boolean isFirstResource) {
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model,
+                                               Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    return false;
+                }
+            };
+
+            CustomImageSizeModel customImageRequest = new CustomImageSizeModelFutureStudio(imageUrl);
+
+            GlideApp.with(appContext)
+                    .load(customImageRequest)
+//                    .thumbnail(thumbnailRequest)
+                    .fitCenter()
+//                    .centerCrop()
 //                    .override(200, 600)
-                        .thumbnail(0.5f)
-//                    .placeholder(R.drawable. ic_sync_black_24dp)
-                        .error(R.drawable.ic_sync_problem_black_24dp)
-                        .into(imgurImage);
-            }
+//                        .thumbnail(0.1f)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .placeholder(R.drawable.ic_autorenew_black_18dp)
+                    .error(R.drawable.ic_downloading_error)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .fallback(R.drawable.ic_downoading)
+                    .transition(GenericTransitionOptions.with(android.R.anim.fade_in))
+                    .listener(requestListener)
+                    .into(imgurImage);
+//            }
         }
 
         if (!TextUtils.isEmpty(imageDescription)) {

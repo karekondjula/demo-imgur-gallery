@@ -27,6 +27,7 @@ import team2.imgurgallery.ui.adapter.ImagesAdapter;
 
 public class ImageActivity extends AppCompatActivity {
 
+    private static final String EMPTY_SPACE = " ";
     private static final String EXTRA_TITLE = "extra_title";
     private static final String EXTRA_DESCRIPTION = "extra_description";
     private static final String EXTRA_UP_VOTES = "extra_up_votes";
@@ -71,19 +72,19 @@ public class ImageActivity extends AppCompatActivity {
 
         if (bundle != null) {
             if (bundle.containsKey(EXTRA_TITLE)) {
-                title.setText(bundle.getString(EXTRA_TITLE));
+                title.setText(EMPTY_SPACE.concat(bundle.getString(EXTRA_TITLE)));
             }
 
             if (bundle.containsKey(EXTRA_UP_VOTES)) {
-                upVotes.setText(bundle.getString(EXTRA_UP_VOTES));
+                upVotes.setText(EMPTY_SPACE.concat(bundle.getString(EXTRA_UP_VOTES)));
             }
 
             if (bundle.containsKey(EXTRA_DOWN_VOTES)) {
-                downVotes.setText(bundle.getString(EXTRA_DOWN_VOTES));
+                downVotes.setText(EMPTY_SPACE.concat(bundle.getString(EXTRA_DOWN_VOTES)));
             }
 
             if (bundle.containsKey(EXTRA_SCORE)) {
-                score.setText(bundle.getString(EXTRA_SCORE));
+                score.setText(EMPTY_SPACE.concat(bundle.getString(EXTRA_SCORE)));
             }
 
             ArrayList<GalleryImage> images;

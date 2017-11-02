@@ -3,10 +3,10 @@
 
     <item android:drawable="@android:color/white" />
 
-    <!--<item>-->
-        <!--<bitmap-->
-            <!--android:gravity="center"-->
-            <!--android:src="@mipmap/eventi_launcher" />-->
-    <!--</item>-->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/logo" />
+    </item>
 
 </layer-list>

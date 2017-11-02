@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/hot"
-        android:icon="@drawable/ic_whatshot"
+        android:icon="@drawable/ic_hot"
         android:title="@string/Hot" />
 
     <item

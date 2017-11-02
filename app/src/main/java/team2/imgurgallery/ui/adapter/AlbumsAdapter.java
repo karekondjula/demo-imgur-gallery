@@ -10,19 +10,22 @@ import team2.imgurgallery.R;
 import team2.imgurgallery.model.GalleryAlbum;
 import team2.imgurgallery.model.retrofit.GalleryResponse;
 import team2.imgurgallery.ui.adapter.viewholder.GalleryViewHolder;
+import team2.imgurgallery.ui.callback.OnClickCallback;
 
 /**
  * Created by d-kareski on 10/23/17.
  */
 public class AlbumsAdapter extends RecyclerView.Adapter<GalleryViewHolder> {
 
-    private Context mContext;
+    private Context appContext;
 
     private GalleryResponse galleryResponse;
+    private OnClickCallback onClickCallback;
 
-    public AlbumsAdapter(Context c) {
-        mContext = c;
+    public AlbumsAdapter(Context appContext, OnClickCallback onClickCallback) {
+        this.appContext = appContext;
         galleryResponse = new GalleryResponse();
+        this.onClickCallback = onClickCallback;
     }
 
     public void setGalleryResponse(GalleryResponse galleryResponse) {
@@ -47,7 +50,7 @@ public class AlbumsAdapter extends RecyclerView.Adapter<GalleryViewHolder> {
     @Override
     public GalleryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album, parent, false);
-        return new GalleryViewHolder(view, mContext);
+        return new GalleryViewHolder(view, appContext, onClickCallback);
     }
 
     @Override

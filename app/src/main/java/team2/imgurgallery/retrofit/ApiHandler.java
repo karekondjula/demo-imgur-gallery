@@ -3,6 +3,7 @@ package team2.imgurgallery.retrofit;
 /**
  * Created by d-kareski on 10/20/17.
  */
+
 import android.support.annotation.WorkerThread;
 
 import com.google.gson.Gson;
@@ -16,11 +17,11 @@ import com.google.gson.JsonParseException;
 
 import java.lang.reflect.Type;
 
-import retrofit.Callback;
-import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
-import retrofit.converter.GsonConverter;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import team2.imgurgallery.model.GalleryAlbum;
 import team2.imgurgallery.model.GalleryImage;
 import team2.imgurgallery.model.retrofit.GalleryResponse;
@@ -30,14 +31,35 @@ public class ApiHandler {
 
     private static final String CLIEND_ID = "Client-ID 5067c93cab3dd48";
 
-    private UiCallback uiCallback;
+    //    private RestAdapter restAdapter;
+    private Retrofit retrofit;
 
-    public ApiHandler(UiCallback uiCallback) {
-        this.uiCallback = uiCallback;
+    private static ApiHandler instance;
+
+    public static ApiHandler getInstance() {
+        if (instance == null) {
+            instance = new ApiHandler();
+        }
+
+        return instance;
     }
 
-    @WorkerThread
-    public void getGallery(String section, String sort, String window, boolean showViral) {
+    private ApiHandler() {
+
+//        observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .onErrorReturn((Throwable ex) -> {
+//                    Log.e("error", ex.getMessage()); //examine error here
+//                    return null; //empty object of the datatype
+//                })
+//                .subscribe(galleryAlbum -> {
+//                    if (galleryAlbum != null) {
+////                        galleryAlbum.forEach(image -> Log.d("image title ", image.getTitle()));
+//                        Log.d("album", "galleryAlbum.id " + galleryAlbum.galleryAlbums.id);
+////                        galleryAlbum.galleryAlbums.images.forEach(image -> Log.d("image title ", image.title));
+//
+//                    }
+//                });
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(GalleryResponse.class, new JsonDeserializer<GalleryResponse>() {
@@ -108,68 +130,47 @@ public class ApiHandler {
                 })
                 .create();
 
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl(ImgurAPI.server)
-//                .addConverterFactory(GsonConverterFactory.create(gson))
-//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-////                .client(okHttpClient)
-//                .build();
-////
-//        ImgurAPI imgurAPI = retrofit.create(ImgurAPI.class);
-//
-//        Observable<GalleryResponse> observable = imgurAPI.getGallery(
-//                CLIEND_ID,
-//                "hot",
-//                "viral",
-//                "day",
-//                0
-//        );
-//
-//        observable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .onErrorReturn((Throwable ex) -> {
-//                    Log.e("error", ex.getMessage()); //examine error here
-//                    return null; //empty object of the datatype
-//                })
-//                .subscribe(galleryAlbum -> {
-//                    if (galleryAlbum != null) {
-////                        galleryAlbum.forEach(image -> Log.d("image title ", image.getTitle()));
-//                        Log.d("album", "galleryAlbum.id " + galleryAlbum.galleryAlbums.id);
-////                        galleryAlbum.galleryAlbums.images.forEach(image -> Log.d("image title ", image.title));
-//
-//                    }
-//                });
-
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(ImgurAPI.server)
-                .setConverter(new GsonConverter(gson))
-//                .setLogLevel(RestAdapter.LogLevel.FULL)
+        retrofit = new Retrofit.Builder()
+                .baseUrl(ImgurAPI.server)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+//                .client(okHttpClient)
                 .build();
+    }
 
-        restAdapter.create(ImgurAPI.class).getGallery(
+    @WorkerThread
+    public void getGalleryCallback(String section, String sort, String window, boolean showViral, UiCallback uiCallback) {
+
+        Call<GalleryResponse> call = retrofit.create(ImgurAPI.class).getGallery(
                 CLIEND_ID,
                 section,
                 sort,
                 window,
                 0,
-                showViral,
-                new Callback<GalleryResponse>() {
-
+                showViral
+        );
+        call.enqueue(new Callback<GalleryResponse>() {
                     @Override
-                    public void success(GalleryResponse galleryResponse, Response response) {
-
-                        if (galleryResponse != null) {
-                            uiCallback.success(galleryResponse, response);
-                        } else {
-                            uiCallback.failure(null);
-                        }
+                    public void onResponse(Call<GalleryResponse> call, Response<GalleryResponse> response) {
+                        uiCallback.onResponse(call, response);
                     }
 
                     @Override
-                    public void failure(RetrofitError error) {
-                        uiCallback.failure(error);
+                    public void onFailure(Call<GalleryResponse> call, Throwable t) {
+                        uiCallback.onFailure(call, t);
                     }
                 }
         );
     }
+
+//    @WorkerThread
+//    public GalleryResponse getGallery(String section, String sort, String window, boolean showViral) {
+//        return restAdapter.create(ImgurAPI.class).getGallery(
+//                CLIEND_ID,
+//                section,
+//                sort,
+//                window,
+//                0,
+//                showViral
+//        );
+//    }
 }

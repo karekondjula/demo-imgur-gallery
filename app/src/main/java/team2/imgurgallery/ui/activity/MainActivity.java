@@ -1,5 +1,7 @@
 package team2.imgurgallery.ui.activity;
 
+import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -22,18 +24,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import retrofit2.Call;
+import retrofit2.Response;
 import team2.imgurgallery.R;
+import team2.imgurgallery.model.GalleryAlbum;
 import team2.imgurgallery.model.retrofit.GalleryResponse;
 import team2.imgurgallery.retrofit.ApiHandler;
 import team2.imgurgallery.retrofit.ImgurAPI;
 import team2.imgurgallery.ui.adapter.AlbumsAdapter;
+import team2.imgurgallery.ui.callback.OnClickCallback;
 import team2.imgurgallery.ui.callback.UiCallback;
 import team2.imgurgallery.ui.fragment.DialogFragmentAbout;
 
@@ -49,15 +54,18 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
 
     private Unbinder unbinder;
-    private ApiHandler apiHandler;
     private AlbumsAdapter adapter;
 
     private String section = ImgurAPI.SECTION_HOT;
     private boolean isViralChecked;
 
+    private Context appContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        appContext = getApplication().getApplicationContext();
 
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
@@ -136,11 +144,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         StaggeredGridLayoutManager sglm = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         sglm.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS);
+        sglm.setItemPrefetchEnabled(true);
         recyclerView.setLayoutManager(sglm);
-        adapter = new AlbumsAdapter(MainActivity.this);
+        adapter = new AlbumsAdapter(appContext, onClickCallback);
         recyclerView.setAdapter(adapter);
-
-        apiHandler = new ApiHandler(uiCallback);
     }
 
     @Override
@@ -186,10 +193,14 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onMenuItemClick(MenuItem item) {
                     switch (item.getItemId()) {
                         case R.id.list:
-                            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                            LinearLayoutManager llm = new LinearLayoutManager(MainActivity.this);
+                            llm.setInitialPrefetchItemCount(3);
+                            recyclerView.setLayoutManager(llm);
                             break;
                         case R.id.grid:
-                            recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this, 2));
+                            GridLayoutManager glm = new GridLayoutManager(MainActivity.this, 2);
+                            glm.setInitialPrefetchItemCount(4);
+                            recyclerView.setLayoutManager(glm);
                             break;
                         case R.id.stag_grid:
                             StaggeredGridLayoutManager sglm = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -219,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread() {
             @Override
             public void run() {
-                apiHandler.getGallery(section, sort, window, showViral);
+                ApiHandler.getInstance().getGalleryCallback(section, sort, window, showViral, uiCallback);
             }
         }.start();
     }
@@ -227,30 +238,45 @@ public class MainActivity extends AppCompatActivity {
     private UiCallback uiCallback = new UiCallback() {
 
         @Override
-        public void success(final GalleryResponse galleryResponse, Response response) {
-
+        public void onResponse(Call<GalleryResponse> call, Response<GalleryResponse> response) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    adapter.setGalleryResponse(galleryResponse);
-                    adapter.notifyDataSetChanged();
-                }
-            });
 
-        }
-
-        @Override
-        public void failure(final RetrofitError error) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (error != null) {
-                        Toast.makeText(MainActivity.this, String.format(getString(R.string.problem_), error), Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, R.string.unknown_error, Toast.LENGTH_LONG).show();
+                    if (response.isSuccessful()) {
+                        GalleryResponse galleryResponse = response.body();
+                        if (galleryResponse != null) {
+                            adapter.setGalleryResponse(response.body());
+                            adapter.notifyDataSetChanged();
+                        } else {
+                            uiCallback.onFailure(call, null);
+                        }
                     }
                 }
             });
+        }
+
+        @Override
+        public void onFailure(Call<GalleryResponse> call, Throwable t) {
+            if (t != null) {
+                Toast.makeText(MainActivity.this, String.format(getString(R.string.problem_), t.getMessage()), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(MainActivity.this, R.string.unknown_error, Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
+    private OnClickCallback onClickCallback = new OnClickCallback() {
+
+        @Override
+        public void onImageSelected(GalleryAlbum galleryAlbum, ImageView imageView) {
+            if (galleryAlbum != null) {
+                Intent intent = ImageActivity.createIntent(MainActivity.this, galleryAlbum);
+
+                ActivityOptions options = ActivityOptions
+                        .makeSceneTransitionAnimation(MainActivity.this, imageView, "transition_event_image");
+                startActivity(intent, options.toBundle());
+            }
         }
     };
 }

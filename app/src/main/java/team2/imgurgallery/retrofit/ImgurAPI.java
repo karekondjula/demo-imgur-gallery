@@ -1,11 +1,11 @@
 package team2.imgurgallery.retrofit;
 
 
-import retrofit.Callback;
-import retrofit.http.GET;
-import retrofit.http.Header;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 import team2.imgurgallery.model.retrofit.GalleryResponse;
 
 /**
@@ -29,17 +29,35 @@ public interface ImgurAPI {
 //            @Path("page") int page
 //    );
 
+//    @GET("/3/gallery/{section}/{sort}/{window}/{page}")
+//    GalleryResponse getGallery(
+//            @Header("Authorization") String auth,
+//            @Path("section") String section, // hot, top, user
+//            @Path("sort") String sort, // viral | top | time | rising
+//            @Path("window") String window, // day | week | month | year | all
+//            @Path("page") int page,
+//            @Query("showViral") boolean showViral
+//    );
+
+//    @GET("/3/gallery/{section}/{sort}/{window}/{page}")
+//    void getGallery(
+//            @Header("Authorization") String auth,
+//            @Path("section") String section, // hot, top, user
+//            @Path("sort") String sort, // viral | top | time | rising
+//            @Path("window") String window, // day | week | month | year | all
+//            @Path("page") int page,
+//            @Query("showViral") boolean showViral,
+//            Callback<GalleryResponse> cb
+//    );
+
+
     @GET("/3/gallery/{section}/{sort}/{window}/{page}")
-    void getGallery(
+    Call<GalleryResponse> getGallery(
             @Header("Authorization") String auth,
             @Path("section") String section, // hot, top, user
             @Path("sort") String sort, // viral | top | time | rising
             @Path("window") String window, // day | week | month | year | all
             @Path("page") int page,
-            @Query("showViral") boolean showViral,
-            Callback<GalleryResponse> cb
+            @Query("showViral") boolean showViral
     );
-
-//    @GET("/3/gallery/image/{id}")
-//    Observable<GalleryResponse> getGallery(@Path("page") String page);
 }

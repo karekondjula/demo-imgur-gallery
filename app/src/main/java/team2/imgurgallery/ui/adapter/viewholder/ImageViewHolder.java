@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.Target;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,21 +45,20 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
              if (galleryImage.link.endsWith(".gif")) {
                  Glide.with(mContext)
                          .load(galleryImage.link)
-                         .asGif()
-                         .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                         .dontTransform()
+//                         .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+//                         .dontTransform()
                          .thumbnail(0.1f)
-                         .placeholder(R.drawable. ic_sync_black_24dp)
-                         .error(R.drawable.ic_sync_problem_black_24dp)
+//                         .placeholder(R.drawable. ic_downoading)
+//                         .error(R.drawable.ic_downloading_error)
                          .into(imgurImage);
              } else {
                  Glide.with(mContext)
                          .load(galleryImage.link)
-                         .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                         .dontTransform()
+//                         .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+//                         .dontTransform()
                          .thumbnail(0.6f)
 //                    .placeholder(R.drawable. ic_sync_black_24dp)
-                         .error(R.drawable.ic_sync_problem_black_24dp)
+//                         .error(R.drawable.ic_downoading)
                          .into(imgurImage);
              }
 
