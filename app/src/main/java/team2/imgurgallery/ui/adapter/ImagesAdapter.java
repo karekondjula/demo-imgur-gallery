@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 
@@ -61,5 +62,11 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImageViewHolder> {
             holder.getView().setTransitionName("");
         }
         holder.setItem(galleryImage);
+    }
+
+    @Override
+    public void onViewRecycled(ImageViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.getImgurImage().setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     }
 }

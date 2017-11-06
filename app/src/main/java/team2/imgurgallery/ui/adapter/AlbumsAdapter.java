@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import team2.imgurgallery.R;
 import team2.imgurgallery.model.GalleryAlbum;
@@ -57,5 +58,11 @@ public class AlbumsAdapter extends RecyclerView.Adapter<GalleryViewHolder> {
     public void onBindViewHolder(GalleryViewHolder holder, int position) {
         final GalleryAlbum galleryAlbum = galleryResponse.galleryAlbums.get(position);
         holder.setItem(galleryAlbum);
+    }
+
+    @Override
+    public void onViewRecycled(GalleryViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.getImgurImage().setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     }
 }

@@ -20,7 +20,6 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -172,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
                     lastVisible = positions[positions.length - 1];
                 }
 
-                Log.d(">>", "load next page, lastVisible " + lastVisible);
                 if (Math.abs(lastVisible - adapter.getItemCount()) < 3) {
                     // TODO show loading next page progress
                     page++;
@@ -195,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         fetchGallery(section, isViralChecked, 0);
     }
 

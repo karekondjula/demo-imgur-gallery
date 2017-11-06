@@ -48,8 +48,7 @@ public class SplashActivity extends AppCompatActivity implements LoaderManager.L
                     for(GalleryAlbum galleryAlbum: galleryResponse.galleryAlbums) {
                         for (GalleryImage galleryImage : galleryAlbum.images) {
                             requestBuilder = Glide.with(getApplicationContext())
-                                    .downloadOnly()
-                                    .load(galleryImage.link);
+                                    .download(galleryImage.link);
 
                             requestBuilder.preload();
                         }

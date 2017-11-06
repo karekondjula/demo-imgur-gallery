@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:contentDescription="imgur image"
+        android:scaleType="centerInside"
         android:transitionName="transition_event_image"
         tools:src="@android:drawable/sym_contact_card" />
 

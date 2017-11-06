@@ -85,6 +85,8 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
                 @Override
                 public boolean onResourceReady(Drawable resource, Object model,
                                                Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+
+                    imgurImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     return false;
                 }
             };
@@ -93,12 +95,7 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
 
             GlideApp.with(appContext)
                     .load(customImageRequest)
-//                    .thumbnail(thumbnailRequest)
                     .fitCenter()
-//                    .centerCrop()
-//                    .override(200, 600)
-//                        .thumbnail(0.1f)
-
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.ic_autorenew_black_18dp)
                     .error(R.drawable.ic_downloading_error)
@@ -115,5 +112,9 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
         } else {
             description.setVisibility(View.GONE);
         }
+    }
+
+    public ImageView getImgurImage() {
+        return imgurImage;
     }
 }
