@@ -35,6 +35,8 @@ public class ApiHandler {
 
     private static ApiHandler instance;
 
+    private GalleryResponse galleryResponse;
+
     public static ApiHandler getInstance() {
         if (instance == null) {
             instance = new ApiHandler();
@@ -44,6 +46,8 @@ public class ApiHandler {
     }
 
     private ApiHandler() {
+
+        galleryResponse = new GalleryResponse();
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(GalleryResponse.class, new JsonDeserializer<GalleryResponse>() {
@@ -122,19 +126,25 @@ public class ApiHandler {
     }
 
     @WorkerThread
-    public void getGalleryCallback(String section, String sort, String window, boolean showViral, UiCallback uiCallback) {
+    public void getGalleryCallback(String section, String sort, String window, boolean showViral, int page, UiCallback uiCallback) {
 
         Call<GalleryResponse> call = retrofit.create(ImgurAPI.class).getGallery(
                 CLIEND_ID,
                 section,
                 sort,
                 window,
-                0,
+                page,
                 showViral
         );
+
+        if (page == 0) {
+            galleryResponse = new GalleryResponse();
+        }
+
         call.enqueue(new Callback<GalleryResponse>() {
                     @Override
                     public void onResponse(Call<GalleryResponse> call, Response<GalleryResponse> response) {
+                        galleryResponse.appendGalleryResponse(response.body());
                         uiCallback.onResponse(call, response);
                     }
 

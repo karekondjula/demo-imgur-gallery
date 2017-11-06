@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -54,11 +56,16 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.grid_view)
     RecyclerView recyclerView;
 
-    private Unbinder unbinder;
-    private AlbumsAdapter adapter;
+    @BindView(R.id.fab_scroll_to_top)
+    FloatingActionButton fab;
 
+    private Unbinder unbinder;
+
+    private AlbumsAdapter adapter;
     private String section = ImgurAPI.SECTION_HOT;
     private boolean isViralChecked;
+
+    private int page = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                         } else if (item.getItemId() == R.id.user) {
                             section = ImgurAPI.SECTION_USER;
                         }
-                        fetchGallery(section, isViralChecked);
+                        fetchGallery(section, isViralChecked, 0);
                         recyclerView.smoothScrollToPosition(0);
 
                     }
@@ -165,8 +172,21 @@ public class MainActivity extends AppCompatActivity {
                     lastVisible = positions[positions.length - 1];
                 }
 
+                Log.d(">>", "load next page, lastVisible " + lastVisible);
                 if (Math.abs(lastVisible - adapter.getItemCount()) < 3) {
-                    Log.d(">>", "load next page");
+                    // TODO show loading next page progress
+                    page++;
+                    fetchGallery(section, isViralChecked, page);
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
                 }
             }
         });
@@ -176,22 +196,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // using loader?
-        fetchGallery(section, isViralChecked);
+        fetchGallery(section, isViralChecked, 0);
     }
-
-//    @Override
-//    public void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        GalleryResponse galleryResponse = (GalleryResponse) savedInstanceState.getParcelable("gallery");
-////        uiCallback.setCachedGalleryResponse(false);
-//    }
-//
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        outState.putParcelable("gallery", uiCallback.getGalleryResponse());
-//        super.onSaveInstanceState(outState);
-//    }
 
     @Override
     protected void onDestroy() {
@@ -201,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         CheckBox viralCheckBox = ButterKnife.findById(MenuItemCompat.getActionView(menu.findItem(R.id.action_viral)), R.id.viral_check_box);
@@ -210,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
                 isViralChecked = isChecked;
 
-                fetchGallery(section, isViralChecked);
+                fetchGallery(section, isViralChecked, 0);
                 recyclerView.smoothScrollToPosition(0);
             }
         });
@@ -256,29 +261,31 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchGallery(String section, boolean showViral) {
+    @OnClick(R.id.fab_scroll_to_top)
+    public void onFabClicked(View view) {
+        recyclerView.smoothScrollToPosition(0);
+    }
+
+    private void fetchGallery(String section, boolean showViral, int page) {
 
         final String sort = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(SettingsActivity.PREF_SORT, "viral");
         final String window = PreferenceManager.getDefaultSharedPreferences(this)
                 .getString(SettingsActivity.PREF_SORT, "day");
 
+        if (page == 0) {
+            this.page = 0;
+        }
+
         new Thread() {
             @Override
             public void run() {
-                ApiHandler.getInstance().getGalleryCallback(section, sort, window, showViral, uiCallback);
+                ApiHandler.getInstance().getGalleryCallback(section, sort, window, showViral, page, uiCallback);
             }
         }.start();
     }
 
     private UiCallback uiCallback = new UiCallback() {
-
-        private GalleryResponse cachedGalleryResponse;
-
-        @Override
-        public GalleryResponse getGalleryResponse() {
-            return cachedGalleryResponse;
-        }
 
         @Override
         public void onResponse(Call<GalleryResponse> call, Response<GalleryResponse> response) {
@@ -289,12 +296,8 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         GalleryResponse galleryResponse = response.body();
                         if (galleryResponse != null) {
-                            cachedGalleryResponse = galleryResponse;
                             adapter.setGalleryResponse(response.body());
                         } else {
-                            if (cachedGalleryResponse != null) {
-                                adapter.setGalleryResponse(cachedGalleryResponse);
-                            }
                             uiCallback.onFailure(call, null);
                         }
                         adapter.notifyDataSetChanged();
@@ -309,10 +312,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, String.format(getString(R.string.problem_), t.getMessage()), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(MainActivity.this, R.string.unknown_error, Toast.LENGTH_LONG).show();
-            }
-
-            if (cachedGalleryResponse != null) {
-                adapter.setGalleryResponse(cachedGalleryResponse);
             }
         }
     };
