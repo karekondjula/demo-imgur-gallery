@@ -19,6 +19,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,13 +60,11 @@ public class MainActivity extends AppCompatActivity {
     private String section = ImgurAPI.SECTION_HOT;
     private boolean isViralChecked;
 
-    private Context appContext;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        appContext = getApplication().getApplicationContext();
+        Context appContext = getApplication().getApplicationContext();
 
         setContentView(R.layout.activity_main);
         unbinder = ButterKnife.bind(this);
@@ -148,14 +147,51 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(sglm);
         adapter = new AlbumsAdapter(appContext, onClickCallback);
         recyclerView.setAdapter(adapter);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                RecyclerView.LayoutManager lm = recyclerView.getLayoutManager();
+                int lastVisible = 0;
+                if (lm instanceof LinearLayoutManager) {
+                    lastVisible = ((LinearLayoutManager) lm).findLastVisibleItemPosition();
+                } else if (lm instanceof GridLayoutManager) {
+                    lastVisible = ((GridLayoutManager) lm).findLastVisibleItemPosition();
+                } else if (lm instanceof StaggeredGridLayoutManager) {
+                    int positions[] = new int[2];
+                    ((StaggeredGridLayoutManager) lm).findLastCompletelyVisibleItemPositions(positions);
+                    lastVisible = positions[positions.length - 1];
+                }
+
+                if (Math.abs(lastVisible - adapter.getItemCount()) < 3) {
+                    Log.d(">>", "load next page");
+                }
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        // using loader?
         fetchGallery(section, isViralChecked);
     }
+
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        GalleryResponse galleryResponse = (GalleryResponse) savedInstanceState.getParcelable("gallery");
+////        uiCallback.setCachedGalleryResponse(false);
+//    }
+//
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        outState.putParcelable("gallery", uiCallback.getGalleryResponse());
+//        super.onSaveInstanceState(outState);
+//    }
 
     @Override
     protected void onDestroy() {
@@ -223,9 +259,9 @@ public class MainActivity extends AppCompatActivity {
     private void fetchGallery(String section, boolean showViral) {
 
         final String sort = PreferenceManager.getDefaultSharedPreferences(this)
-                                                .getString(SettingsActivity.PREF_SORT, "viral");
+                .getString(SettingsActivity.PREF_SORT, "viral");
         final String window = PreferenceManager.getDefaultSharedPreferences(this)
-                                                .getString(SettingsActivity.PREF_SORT, "day");
+                .getString(SettingsActivity.PREF_SORT, "day");
 
         new Thread() {
             @Override
@@ -237,6 +273,13 @@ public class MainActivity extends AppCompatActivity {
 
     private UiCallback uiCallback = new UiCallback() {
 
+        private GalleryResponse cachedGalleryResponse;
+
+        @Override
+        public GalleryResponse getGalleryResponse() {
+            return cachedGalleryResponse;
+        }
+
         @Override
         public void onResponse(Call<GalleryResponse> call, Response<GalleryResponse> response) {
             runOnUiThread(new Runnable() {
@@ -246,11 +289,15 @@ public class MainActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         GalleryResponse galleryResponse = response.body();
                         if (galleryResponse != null) {
+                            cachedGalleryResponse = galleryResponse;
                             adapter.setGalleryResponse(response.body());
-                            adapter.notifyDataSetChanged();
                         } else {
+                            if (cachedGalleryResponse != null) {
+                                adapter.setGalleryResponse(cachedGalleryResponse);
+                            }
                             uiCallback.onFailure(call, null);
                         }
+                        adapter.notifyDataSetChanged();
                     }
                 }
             });
@@ -262,6 +309,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, String.format(getString(R.string.problem_), t.getMessage()), Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(MainActivity.this, R.string.unknown_error, Toast.LENGTH_LONG).show();
+            }
+
+            if (cachedGalleryResponse != null) {
+                adapter.setGalleryResponse(cachedGalleryResponse);
             }
         }
     };

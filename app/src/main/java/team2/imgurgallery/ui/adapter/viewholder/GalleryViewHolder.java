@@ -75,34 +75,6 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
 
         if (!TextUtils.isEmpty(imageUrl)) {
 
-//            if (imageUrl.endsWith(".gif")) {
-//                Glide.with(appContext)
-//                        .load(imageUrl)
-//                        .asGif()
-//                        .fitCenter()
-////                    .override(200, 600)
-//                        .thumbnail(0.3f)
-//                    .placeholder(R.drawable. ic_sync_black_24dp)
-//                        .error(R.drawable.ic_sync_problem_black_24dp)
-//                        .crossFade()
-//                        .fallback(R.drawable. ic_sync_black_24dp)
-//                        .into(imgurImage);
-//            } else {
-
-
-//            private SimpleTarget target2 = new SimpleTarget<Bitmap>( 300, 800 ) {
-//                @Override
-//                public void onResourceReady(Bitmap bitmap, GlideAnimation glideAnimation) {
-//                    imageView2.setImageBitmap( bitmap );
-//                }
-//            };
-
-
-//            DrawableRequestBuilder<String> thumbnailRequest = Glide
-//                    .with(appContext)
-//                    .load(imageUrl);
-
-
             RequestListener<Drawable> requestListener = new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model,
@@ -126,7 +98,8 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
 //                    .centerCrop()
 //                    .override(200, 600)
 //                        .thumbnail(0.1f)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.ic_autorenew_black_18dp)
                     .error(R.drawable.ic_downloading_error)
                     .transition(DrawableTransitionOptions.withCrossFade())
@@ -134,7 +107,6 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
                     .transition(GenericTransitionOptions.with(android.R.anim.fade_in))
                     .listener(requestListener)
                     .into(imgurImage);
-//            }
         }
 
         if (!TextUtils.isEmpty(imageDescription)) {

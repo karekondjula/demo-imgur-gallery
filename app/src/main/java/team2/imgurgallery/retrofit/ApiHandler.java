@@ -31,7 +31,6 @@ public class ApiHandler {
 
     private static final String CLIEND_ID = "Client-ID 5067c93cab3dd48";
 
-    //    private RestAdapter restAdapter;
     private Retrofit retrofit;
 
     private static ApiHandler instance;
@@ -45,21 +44,6 @@ public class ApiHandler {
     }
 
     private ApiHandler() {
-
-//        observable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .onErrorReturn((Throwable ex) -> {
-//                    Log.e("error", ex.getMessage()); //examine error here
-//                    return null; //empty object of the datatype
-//                })
-//                .subscribe(galleryAlbum -> {
-//                    if (galleryAlbum != null) {
-////                        galleryAlbum.forEach(image -> Log.d("image title ", image.getTitle()));
-//                        Log.d("album", "galleryAlbum.id " + galleryAlbum.galleryAlbums.id);
-////                        galleryAlbum.galleryAlbums.images.forEach(image -> Log.d("image title ", image.title));
-//
-//                    }
-//                });
 
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(GalleryResponse.class, new JsonDeserializer<GalleryResponse>() {
@@ -161,16 +145,4 @@ public class ApiHandler {
                 }
         );
     }
-
-//    @WorkerThread
-//    public GalleryResponse getGallery(String section, String sort, String window, boolean showViral) {
-//        return restAdapter.create(ImgurAPI.class).getGallery(
-//                CLIEND_ID,
-//                section,
-//                sort,
-//                window,
-//                0,
-//                showViral
-//        );
-//    }
 }

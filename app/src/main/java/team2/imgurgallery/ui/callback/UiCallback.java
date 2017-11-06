@@ -8,4 +8,5 @@ import team2.imgurgallery.model.retrofit.GalleryResponse;
  */
 public interface UiCallback extends Callback<GalleryResponse> {
 
+    GalleryResponse getGalleryResponse();
 }
